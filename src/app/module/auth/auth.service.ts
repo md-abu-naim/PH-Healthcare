@@ -91,6 +91,10 @@ const loginUser = async (payload: ILoginUserPayload) => {
 		throw new Error("User is deleted");
 	}
 
+	if(user.password === null && user.googleId !== null){
+		throw new Error("User already has account registered with google. Try to google login")
+	}
+
 	const isPasswordMatched = await bcrypt.compare(password, user.password as string);
 
 	if (!isPasswordMatched) {
@@ -217,7 +221,7 @@ const googleLoginIntoDB = async(payload: IGoogleLoginPayload) => {
 		throw new Error('Name not fount')
 	}
 
-	const isPatientExisting = await prisma.user.findUnique({
+	const isPatientExistingWithLogin = await prisma.user.findUnique({
 		where: {
 			email: googleIdTokenPayload.email,
 			role: Role.PATIENT,
@@ -225,16 +229,45 @@ const googleLoginIntoDB = async(payload: IGoogleLoginPayload) => {
 		}
 	})
 
-	let user = isPatientExisting
+	let user = isPatientExistingWithLogin
 
-	if(!user){
-		user = await prisma.user.create({
+	if(!isPatientExistingWithLogin){
+		const isPatientExistingWithCredentials = await prisma.user.findUnique({
+			where: {
+				email: googleIdTokenPayload.email,
+			role: Role.PATIENT,
+			authProvider: AuthProvider.CREDENTIAL
+			}
+		})
+
+		if(isPatientExistingWithCredentials){
+			if(!isPatientExistingWithCredentials.emailVerified){
+				throw new Error("Email not verified")
+			}
+			if(isPatientExistingWithCredentials.status === UserStatus.BLOCKED){
+				throw new Error("User Is Blocked")
+			}
+			if(isPatientExistingWithCredentials.isDeleted || isPatientExistingWithCredentials.status === UserStatus.DELETED){
+				throw new Error("User is Deleted")
+			}
+
+			user = await prisma.user.update({
+				where: {
+					id: isPatientExistingWithCredentials.id
+				},
+				data: {
+					googleId: googleIdTokenPayload.sub
+				}
+			})
+		}else {
+			user = await prisma.user.create({
 			data: {
 				name: googleIdTokenPayload.name,
 				email: googleIdTokenPayload.email,
 				role: Role.PATIENT,
 				googleId: googleIdTokenPayload.sub,
 				authProvider: AuthProvider.GOOGLE,
+				emailVerified: true,
 				patient: {
 					create: {
 						name: googleIdTokenPayload.name,
@@ -243,6 +276,18 @@ const googleLoginIntoDB = async(payload: IGoogleLoginPayload) => {
 				}
 			}
 		})
+		}
+	}
+
+	if(!user){
+		throw new Error("User not found")
+	}
+
+	if(user.status === UserStatus.BLOCKED){
+				throw new Error("User Is Blocked")
+	}
+	if(user.isDeleted || user.status === UserStatus.DELETED){
+				throw new Error("User is Deleted")
 	}
 
 	const jwtPayload = {
