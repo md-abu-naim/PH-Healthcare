@@ -20,13 +20,13 @@ export const seedSuperAdmin = async () => {
         const email = config.super_admin_email
         const password = config.super_admin_password
 
-        if(!name || !email || !password){
+        if (!name || !email || !password) {
             throw new Error("Name, Email, Password is missing from .env!")
         }
 
         const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
 
-        const superAdmin = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 name,
                 email,
@@ -36,6 +36,8 @@ export const seedSuperAdmin = async () => {
                 emailVerified: true
             }
         })
+
+        console.log("Super Admin Created!");
     } catch (error) {
         console.log(error);
 
@@ -46,3 +48,95 @@ export const seedSuperAdmin = async () => {
         })
     }
 }
+
+export const seedTesterAdmin = async () => {
+    try {
+        const isAdminExists = await prisma.user.findFirst({
+            where: {
+                role: Role.ADMIN
+            }
+        })
+
+        if (isAdminExists) {
+            console.log("Admin Already Exists!");
+            return
+        }
+
+        const name = config.tester_admin_name
+        const email = config.tester_admin_email
+        const password = config.tester_admin_password
+
+        if (!name || !email || !password) {
+            throw new Error("Name, Email, Password is missing from .env!")
+        }
+
+        const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
+
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: Role.ADMIN,
+                needPasswordChange: false,
+                emailVerified: true
+            }
+        })
+
+        console.log("Tester Admin Created!");
+    } catch (error) {
+        console.log(error);
+
+        await prisma.user.delete({
+            where: {
+                email: config.tester_admin_email
+            }
+        })
+    }
+}
+
+// export const seedDoctor = async () => {
+//     try {
+//         const isDoctorExists = await prisma.user.findFirst({
+//             where: {
+//                 role: Role.DOCTOR
+//             }
+//         })
+
+//         if (isDoctorExists) {
+//             console.log("Doctor Already Exists!");
+//             return
+//         }
+
+//         const name = config.tester_doctor_name
+//         const email = config.tester_doctor_email
+//         const password = config.tester_doctor_password
+
+//         if (!name || !email || !password) {
+//             throw new Error("Name, Email, Password is missing from .env!")
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
+
+//         await prisma.user.create({
+//             data: {
+//                 name,
+//                 email,
+//                 password: hashedPassword,
+//                 role: Role.DOCTOR,
+//                 needPasswordChange: false,
+//                 emailVerified: true
+//             }
+//         })
+
+//         console.log("Tester Doctor Created!");
+//     } catch (error) {
+//         console.log(error);
+
+//         await prisma.user.delete({
+//             where: {
+//                 email: config.tester_doctor_email
+//             }
+//         })
+//     }
+// }
