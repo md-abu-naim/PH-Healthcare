@@ -7,7 +7,7 @@ import { AuthService } from "./auth.service";
 import z, { string } from "zod";
 
 const PatientRegistationZod = z.object({
-	name: z.string().min(3),
+	name: z.string("Not A String !!!").min(3, "too Short"),
 	email: z.email(),
 	password: z.string().min(6)
 	.regex(/[A-Z]/, { message: "Add an uppercase letter" })
@@ -22,7 +22,7 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
 	const payload = PatientRegistationZod.safeParse(req.body);
 
 	if(!payload.success){
-		throw new Error(payload.error.message)
+		throw new Error(payload.error.issues[0].message)
 	}
 
 	const result = await AuthService.registerPatient(payload.data);
