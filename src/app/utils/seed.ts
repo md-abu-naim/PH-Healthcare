@@ -95,48 +95,48 @@ export const seedTesterAdmin = async () => {
     }
 }
 
-// export const seedDoctor = async () => {
-//     try {
-//         const isDoctorExists = await prisma.user.findFirst({
-//             where: {
-//                 role: Role.DOCTOR
-//             }
-//         })
+export const seedDoctor = async () => {
+    try {
+        const isDoctorExists = await prisma.user.findFirst({
+            where: {
+                role: Role.DOCTOR
+            }
+        })
 
-//         if (isDoctorExists) {
-//             console.log("Doctor Already Exists!");
-//             return
-//         }
+        if (isDoctorExists) {
+            console.log("Doctor Already Exists!");
+            return
+        }
 
-//         const name = config.tester_doctor_name
-//         const email = config.tester_doctor_email
-//         const password = config.tester_doctor_password
+        const name = config.tester_doctor_name
+        const email = config.tester_doctor_email
+        const password = config.tester_doctor_password
 
-//         if (!name || !email || !password) {
-//             throw new Error("Name, Email, Password is missing from .env!")
-//         }
+        if (!name || !email || !password) {
+            throw new Error("Name, Email, Password is missing from .env!")
+        }
 
-//         const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
+        const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
 
-//         await prisma.user.create({
-//             data: {
-//                 name,
-//                 email,
-//                 password: hashedPassword,
-//                 role: Role.DOCTOR,
-//                 needPasswordChange: false,
-//                 emailVerified: true
-//             }
-//         })
+        await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: Role.DOCTOR,
+                needPasswordChange: false,
+                emailVerified: true
+            }
+        })
 
-//         console.log("Tester Doctor Created!");
-//     } catch (error) {
-//         console.log(error);
+        console.log("Tester Doctor Created!");
+    } catch (error) {
+        console.log(error);
 
-//         await prisma.user.delete({
-//             where: {
-//                 email: config.tester_doctor_email
-//             }
-//         })
-//     }
-// }
+        await prisma.user.delete({
+            where: {
+                email: config.tester_doctor_email
+            }
+        })
+    }
+}
