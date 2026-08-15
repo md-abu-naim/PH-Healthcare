@@ -4,12 +4,11 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import type { IRequestUser } from "./auth.interface";
 import { AuthService } from "./auth.service";
-import { patientValidation } from "./auth.validation";
 
 const registerPatient = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body
 
-	const result = await AuthService.registerPatient(payload.data);
+	const result = await AuthService.registerPatient(payload);
 
 	const { accessToken, refreshToken, user, patient } = result;
 
@@ -160,15 +159,13 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
 	const payload = req.body
 
-	const result = await AuthService.resetPassword(payload)
-
-	
+ await AuthService.resetPassword(payload)
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: "New tokens generated successfully",
-		data: result
+		message: `OTP Send to Email: ${payload.email}`,
+		data: null
 	});
 });
 
