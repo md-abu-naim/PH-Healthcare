@@ -20,7 +20,22 @@ const patientLoginZod = z.object({
 	.regex(/[0-9]/, { message: "Add a number" }),
 })
 
+const forgotPasswordZod = z.object({
+	email: z.email()
+})
+
+const resetPasswordZOd = z.object({
+    email: z.email(),
+    newPassword: z.string().min(6)
+	.regex(/[A-Z]/, { message: "Add an uppercase letter" })
+	.regex(/[a-z]/, { message: "Add a lowercase letter" })
+	.regex(/[0-9]/, { message: "Add a number" }),
+	otp: z.string().length(6)
+})
+
 export const patientValidation = {
     PatientRegistationZod,
-    patientLoginZod
+    patientLoginZod,
+	forgotPasswordZod,
+	resetPasswordZOd
 }
