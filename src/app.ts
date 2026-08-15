@@ -7,6 +7,7 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import z from "zod";
+import { redisClient } from "./app/lib/redis";
 
 const app: Application = express();
 
@@ -26,24 +27,19 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth", AuthRoutes);
 
-app.post("/zod", async (req: Request, res: Response, next: NextFunction) => {
+app.get("/test", async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const UserZodSchema = z.object({
-			name: z.string(),
-			email: z.email(),
-			age: z.number().optional(),
-			isVerified: z.boolean().optional(),
-			books: z.array(z.string()).optional()
+		await redisClient.set("forgot-password-otp:patient1@gmail.com", "123456", {
+			expiration: {
+				type: "EX",
+				value: 60
+			}
 		})
-
-		const payload = req.body
-
-		const result = UserZodSchema.safeParse(payload)
 
 		res.status(httpStatus.OK).json({
 			success: true,
 			message: "Zod Validation",
-			data: result
+			data: null
 		});
 	} catch (error) {
 		console.log(error);
