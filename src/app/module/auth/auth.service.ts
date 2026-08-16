@@ -34,48 +34,83 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
 
 	const hashedPassword = await bcrypt.hash(password, 8);
 
-	const createdUser = await prisma.user.create({
-		data: {
-			name,
-			email,
-			password: hashedPassword,
-			role: Role.PATIENT,
-			status: UserStatus.ACTIVE,
-			emailVerified: false,
-			patient: {
-				create: { name, email, contactNumber: patientData?.contactNumber || "" },
-			},
-		},
-		omit: { password: true },
-		include: { patient: true },
-	});
+	const otp = crypto.randomInt(100000, 1000000)
+	const otpKey = `patient-registation-otp:${email}`
 
-	const { patient, ...user } = createdUser;
-	const jwtPayload = {
-		userId: user.id,
-		name: user.name,
-		email: user.email,
-		role: user.role,
-	};
+	await redisClient.set(otpKey, otp, {
+		expiration: {
+			type: 'EX',
+			value: 5 * 60
+		}
+	})
 
-	const accessToken = jwtUtils.createToken(
-		jwtPayload,
-		config.jwt_access_secret,
-		config.jwt_access_expires_in as SignOptions,
-	);
+	const patientRegistationKey = `patient-registation-data:${email}`
+	const redisUserPayload = {
+		name, email, password: hashedPassword, patient: patientData
+	}
 
-	const refreshToken = jwtUtils.createToken(
-		jwtPayload,
-		config.jwt_refresh_secret,
-		config.jwt_refresh_expires_in as SignOptions,
-	);
+	await redisClient.set(patientRegistationKey, JSON.stringify(redisUserPayload), {
+		expiration: {
+			type: 'EX',
+			value: 5 * 60
+		}
+	})
 
-	return {
-		user,
-		patient,
-		accessToken,
-		refreshToken,
-	};
+	const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/patient-registation-otp.ejs')
+
+	const html = await ejs.renderFile(tamplatePath, {
+		otp
+	})
+
+	await transporter.sendMail({
+		from: config.email_sender,
+		to: email,
+		subject: "User Registation Verification Code",
+		html
+	})
+
+	// const createdUser = await prisma.user.create({
+	// 	data: {
+	// 		name,
+	// 		email,
+	// 		password: hashedPassword,
+	// 		role: Role.PATIENT,
+	// 		status: UserStatus.ACTIVE,
+	// 		emailVerified: false,
+	// 		patient: {
+	// 			create: { name, email, contactNumber: patientData?.contactNumber || "" },
+	// 		},
+	// 	},
+	// 	omit: { password: true },
+	// 	include: { patient: true },
+	// });
+
+	// const { patient, ...user } = createdUser;
+	// const jwtPayload = {
+	// 	userId: user.id,
+	// 	name: user.name,
+	// 	email: user.email,
+	// 	role: user.role,
+	// };
+
+	// const accessToken = jwtUtils.createToken(
+	// 	jwtPayload,
+	// 	config.jwt_access_secret,
+	// 	config.jwt_access_expires_in as SignOptions,
+	// );
+
+	// const refreshToken = jwtUtils.createToken(
+	// 	jwtPayload,
+	// 	config.jwt_refresh_secret,
+	// 	config.jwt_refresh_expires_in as SignOptions,
+	// );
+
+	// return {
+	// 	user,
+	// 	patient,
+	// 	accessToken,
+	// 	refreshToken,
+	// };
 };
 
 const loginUser = async (payload: ILoginUserPayload) => {
@@ -427,11 +462,15 @@ const resetPassword = async(payload: IResetPasswarPayload) => {
 
 	await redisClient.del([key])
 
+	const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/reset-password.ejs')
+
+	const html = await ejs.renderFile(tamplatePath)
+
 	await transporter.sendMail({
 		from: config.email_sender,
 		to: isUserExists.email,
 		subject: "Forgot Password Verification Code",
-		html: `<h1>Your Password Changed</h1>`
+		html
 	})
 }
 
