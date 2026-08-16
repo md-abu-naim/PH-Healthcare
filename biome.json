@@ -6,7 +6,11 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!src/app/tamplates"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -29,7 +33,12 @@
 				"noNonNullAssertion": "info",
 				"useNodejsImportProtocol": "info"
 			}
-		}
+		},
+		"includes": [
+			"**",
+			"!src/app/tamplates"
+		]
+
 	},
 	"javascript": {
 		"formatter": {

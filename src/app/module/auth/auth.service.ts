@@ -17,6 +17,8 @@ import { googleClient } from "../../lib/googleAuth";
 import crypto from 'crypto'
 import { redisClient } from "../../lib/redis";
 import { transporter } from "../../lib/nodemailer";
+import ejs from 'ejs'
+import path from "path";
 
 const registerPatient = async (payload: IRegisterPatientPayload) => {
 	const { name, password, patient: patientData } = payload;
@@ -357,11 +359,18 @@ const forgotPassword = async(payload: IForgotPasswarPayload) => {
 		}
 	})
 
+	const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/forgot-password.ejs')
+
+	const html = await ejs.renderFile(tamplatePath, {
+		otp
+	})
+
 	await transporter.sendMail({
 		from: config.email_sender,
 		to: isUserExists.email,
 		subject: "Forgot Password Verification Code",
-		text: `Your OTP is: ${otp}`
+		// text: `Your OTP is: ${otp}`
+		html
 	})
 }
 
@@ -417,6 +426,13 @@ const resetPassword = async(payload: IResetPasswarPayload) => {
 	})
 
 	await redisClient.del([key])
+
+	await transporter.sendMail({
+		from: config.email_sender,
+		to: isUserExists.email,
+		subject: "Forgot Password Verification Code",
+		html: `<h1>Your Password Changed</h1>`
+	})
 }
 
 export const AuthService = {
