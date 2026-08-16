@@ -132,6 +132,21 @@ const varifyPatientEmail = async(payload:IVerifyPatientEmailPayload ) => {
 		include: { patient: true },
 	});
 
+	await redisClient.del([patientRegistationKey])
+
+	const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/welcome-email.ejs')
+
+	const html = await ejs.renderFile(tamplatePath, {
+		name: createdUser.email
+	})
+
+	await transporter.sendMail({
+		from: config.email_sender,
+		to: email,
+		subject: "Welcome to PH Healthcare!",
+		html
+	})
+
 	const { patient, ...user } = createdUser;
 	const jwtPayload = {
 		userId: user.id,
@@ -365,6 +380,19 @@ const googleLoginIntoDB = async(payload: IGoogleLoginPayload) => {
 				}
 			}
 		})
+
+		const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/welcome-email.ejs')
+
+	const html = await ejs.renderFile(tamplatePath, {
+		name: user.name
+	})
+
+	await transporter.sendMail({
+		from: config.email_sender,
+		to: user.email,
+		subject: "Welcome to PH Healthcare!",
+		html
+	})
 		}
 	}
 
