@@ -10,32 +10,44 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
 
 	await AuthService.registerPatient(payload);
 
-	// const { accessToken, refreshToken, user, patient } = result;
+	sendResponse(res, {
+		statusCode: httpStatus.CREATED,
+		success: true,
+		message: "Patient Varifaction OTP sent",
+		data: null
+	});
+});
 
-	// res.cookie("accessToken", accessToken, {
-	// 	httpOnly: true,
-	// 	secure: false,
-	// 	sameSite: "none",
-	// 	maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
-	// });
-	// res.cookie("refreshToken", refreshToken, {
-	// 	httpOnly: true,
-	// 	secure: false,
-	// 	sameSite: "none",
-	// 	maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-	// });
+const verifyPatientEmail = catchAsync(async (req: Request, res: Response) => {
+	const payload = req.body
+
+	const result = await AuthService.varifyPatientEmail(payload);
+
+	const { accessToken, refreshToken, user, patient } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	});
 
 	sendResponse(res, {
 		statusCode: httpStatus.CREATED,
 		success: true,
-		message: "Patient Patient Varifaction code sent",
-		// data: {
-		// 	accessToken,
-		// 	refreshToken,
-		// 	user,
-		// 	patient,
-		// },
-		data: null
+		message: "Patient Ragistaion Successfully",
+		data: {
+			accessToken,
+			refreshToken,
+			user,
+			patient,
+		},
 	});
 });
 
@@ -175,5 +187,5 @@ export const AuthController = {
 	loginUser, forgotPassword,
 	getMe, resetPassword,
 	refreshToken,
-	googleLogin
+	googleLogin, verifyPatientEmail
 };

@@ -8,6 +8,7 @@ import { patientValidation } from "./auth.validation";
 const router = Router();
 
 router.post("/register", validationRequest(patientValidation.PatientRegistationZod), AuthController.registerPatient);
+router.post("/verify-email", validationRequest(patientValidation.VerifyPatientEmailZod), AuthController.verifyPatientEmail);
 router.post("/login", validationRequest(patientValidation.patientLoginZod), AuthController.loginUser);
 router.get(
 	"/me",

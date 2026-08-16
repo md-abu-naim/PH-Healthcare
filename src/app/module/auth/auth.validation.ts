@@ -12,6 +12,11 @@ const PatientRegistationZod = z.object({
 	}).optional()
 })
 
+const VerifyPatientEmailZod = z.object({
+	email: z.email(),
+	otp: z.string().length(6)
+})
+
 const patientLoginZod = z.object({
     email: z.email(),
     password: z.string().min(6)
@@ -37,5 +42,6 @@ export const patientValidation = {
     PatientRegistationZod,
     patientLoginZod,
 	forgotPasswordZod,
-	resetPasswordZOd
+	resetPasswordZOd,
+	VerifyPatientEmailZod
 }
