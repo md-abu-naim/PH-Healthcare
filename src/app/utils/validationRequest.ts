@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
 import { catchAsync } from "./catchAsync"
 import { patientValidation } from "../module/auth/auth.validation";
-import z from "zod";
+import type z from "zod";
 
 export const validationRequest = (zodSchema: z.ZodObject) => {
     return catchAsync((req: Request, res: Response, next: NextFunction) => {

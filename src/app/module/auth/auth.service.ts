@@ -13,7 +13,7 @@ import type {
 	IResetPasswarPayload,
 	IVerifyPatientEmailPayload,
 } from "./auth.interface";
-import { type TokenPayload } from "google-auth-library";
+import type { TokenPayload } from "google-auth-library";
 import { googleClient } from "../../lib/googleAuth";
 import crypto from 'crypto'
 import { redisClient } from "../../lib/redis";
