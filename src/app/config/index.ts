@@ -37,6 +37,7 @@ export default {
 	bkash_base_url: process.env.BKASH_BASE_URL!,
 	bkash_username: process.env.BAKSH_USERNAME!,
 	bkash_password: process.env.BKASH_PASSWORD!,
-	bkash_api_key: process.env.BKASH_API_KEY!,
-	bkash_api_secret: process.env.BKASH_API_SECRET!,
+	bkash_app_key: process.env.BKASH_APP_KEY!,
+	bkash_app_secret: process.env.BKASH_APP_SECRET!,
+	bkash_callBack_url: process.env.BKASH_CALLBACK_URL!,
 };

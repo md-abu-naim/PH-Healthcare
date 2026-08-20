@@ -8,9 +8,11 @@ export const getBkashIdToken = async () => {
 
         let bkashIdToken = await redisClient.get(idTokenKey)
         const bkashIdTokenTTL = await redisClient.ttl(idTokenKey)
-        let bkashRefreshToken = await redisClient.get(refreshTokenKey)
 
-        if (bkashIdTokenTTL && bkashRefreshToken) {
+        const bkashRefreshToken = await redisClient.get(refreshTokenKey)
+        const bkashRefreshTokenTTL = await redisClient.ttl(refreshTokenKey)
+
+        if ((bkashIdTokenTTL <= 600 || !bkashIdToken) && bkashRefreshToken && bkashRefreshTokenTTL > 600) {
             const refreshTokenResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/token/refresh`, {
                 method: "POST",
                 headers: {
@@ -21,8 +23,8 @@ export const getBkashIdToken = async () => {
                 },
                 body: JSON.stringify(
                     {
-                        app_key: config.bkash_api_key,
-                        app_secret: config.bkash_api_secret,
+                        app_key: config.bkash_app_key,
+                        app_secret: config.bkash_app_secret,
                         refresh_token: bkashRefreshToken
                     })
             })
@@ -41,7 +43,7 @@ export const getBkashIdToken = async () => {
             return bkashIdToken
         }
 
-        if (bkashIdToken) {
+        if (bkashIdTokenTTL > 600) {
             return bkashIdToken
         }
 
@@ -55,8 +57,8 @@ export const getBkashIdToken = async () => {
             },
             body: JSON.stringify(
                 {
-                    app_key: config.bkash_api_key,
-                    app_secret: config.bkash_api_secret
+                    app_key: config.bkash_app_key,
+                    app_secret: config.bkash_app_secret,
                 })
         })
 
