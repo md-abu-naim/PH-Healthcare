@@ -67,7 +67,31 @@ async function bookAppointmentCallBack(query: Record<string, any>) {
 
     const executedPayment = await executedPaymentResponse.json()
 
-    return executedPayment
+    if (status === 'success') {
+        return {
+            executedPayment,
+            redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=success`
+        }
+    }
+
+    if (status === 'failure') {
+        return {
+            executedPayment,
+            redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=failure`
+        }
+    }
+
+    if (status === 'cancel') {
+        return {
+            executedPayment,
+            redirectUrl: `${config.frontend_url}/dashboard/my-appointments?status=cancel`
+        }
+    }
+
+    return {
+        executedPayment,
+        redirectUrl: `${config.frontend_url}/dashboard/my-appointments`
+    }
 }
 
 export const AppointmentServices = {
