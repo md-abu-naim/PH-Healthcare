@@ -19,11 +19,9 @@ const bookAppointment = async () => {
         },
         body: JSON.stringify(
             {
-                agreementID: 'TokenizedMerchant01L3IKB6H1565072174986',
-                mode: "0001",
+                mode: "0011",
                 payerReference: "01723888888",
                 callbackURL: `${config.bkash_callBack_url}/appointment/book-appointment/payment/callback`,
-                merchantAssociationInfo: "MI05MID54RF09123456One",
                 amount: "120",
                 currency: "BDT",
                 intent: "sale",
@@ -35,6 +33,10 @@ const bookAppointment = async () => {
     return bkashCreatePaymentResult
 }
 
+const bookAppointmentCallBack = () => {
+    return {success: true}
+}
+
 export const AppointmentServices = {
-    bookAppointment
+    bookAppointment, bookAppointmentCallBack
 }
