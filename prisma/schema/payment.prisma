@@ -7,7 +7,7 @@ model Payment {
     currency String  @default("BDT")
 
     paymentGateway String @default("Bkash")
-    marchantInvoiceNumber String @unique
+    merchantInvoiceNumber String @unique
 
     bkashPaymentId String? @unique
     bkashTrxId String?
@@ -17,7 +17,7 @@ model Payment {
     gatewayResponse Json?
 
     refundTrxId String?
-    refundAmount Decimal @db.Decimal(10, 2)
+    refundAmount Decimal? @db.Decimal(10, 2)
     refundReason String?
     refundedAt String?
 
