@@ -283,7 +283,7 @@ const cancelAppointment = async (payload: any) => {
         })
 
         const bkashRefundPaymentResult = await bkashRefundPaymentResponse.json()
-        console.log(bkashRefundPaymentResult);
+
 
         const updatedPayment = await tx.payment.update({
             where: {
