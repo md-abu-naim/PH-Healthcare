@@ -264,7 +264,7 @@ const cancelAppointment = async (payload: any) => {
             throw new Error('No Bkash Access Token Found')
         }
 
-        const bkashRefundPaymentResponse = await fetch(`${config.bkash_base_url}/v2/tokenized-checkout/refund/payment/transaction`, {
+        const bkashRefundPaymentResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/payment/refund`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -277,11 +277,13 @@ const cancelAppointment = async (payload: any) => {
                     paymentId: existingAppointment.payment?.bkashPaymentId,
                     trxId: existingAppointment.payment?.bkashTrxId,
                     refundAmount: existingAppointment.payment?.amount,
+                    sku: "Appointment Cancellation",
                     reason: "Patient Cancelled the Appointment"
                 })
         })
 
         const bkashRefundPaymentResult = await bkashRefundPaymentResponse.json()
+        console.log(bkashRefundPaymentResult);
 
         const updatedPayment = await tx.payment.update({
             where: {
@@ -291,7 +293,9 @@ const cancelAppointment = async (payload: any) => {
                 refundTrxId: bkashRefundPaymentResult.refundTrxId,
                 refundAmount: bkashRefundPaymentResult.refundAmount,
                 refundedAt: bkashRefundPaymentResult.completedTime,
-                refundReason: bkashRefundPaymentResult.refundReason
+                refundReason: bkashRefundPaymentResult.refundReason,
+                status: PaymentStatus.REFUNDED,
+                gatewayResponse: bkashRefundPaymentResult
             }
         })
 
