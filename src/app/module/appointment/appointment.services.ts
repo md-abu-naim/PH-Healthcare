@@ -274,9 +274,9 @@ const cancelAppointment = async (payload: any) => {
             },
             body: JSON.stringify(
                 {
-                    paymentId: existingAppointment.payment?.bkashPaymentId,
-                    trxId: existingAppointment.payment?.bkashTrxId,
-                    refundAmount: existingAppointment.payment?.amount,
+                    paymentID: existingAppointment.payment?.bkashPaymentId,
+                    trxID: existingAppointment.payment?.bkashTrxId,
+                    amount: existingAppointment.payment?.amount.toString(),
                     sku: "Appointment Cancellation",
                     reason: "Patient Cancelled the Appointment"
                 })
@@ -290,10 +290,10 @@ const cancelAppointment = async (payload: any) => {
                 appointmentId: existingAppointment.id
             },
             data: {
-                refundTrxId: bkashRefundPaymentResult.refundTrxId,
-                refundAmount: bkashRefundPaymentResult.refundAmount,
+                refundTrxId: bkashRefundPaymentResult.refundTrxID,
+                refundAmount: bkashRefundPaymentResult.amount,
                 refundedAt: bkashRefundPaymentResult.completedTime,
-                refundReason: bkashRefundPaymentResult.refundReason,
+                refundReason: 'Patient Cancelled the Appointment',
                 status: PaymentStatus.REFUNDED,
                 gatewayResponse: bkashRefundPaymentResult
             }
