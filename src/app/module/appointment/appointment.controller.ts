@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
@@ -13,7 +13,21 @@ const bookAppointment = catchAsync(async (req: Request, res: Response, next: Nex
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Appointment Booking Successfully",
+        message: "ppointment Payment Initiated Successfully",
+        data: result,
+    });
+})
+
+const payAppointment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body
+    const user = req.user!
+
+    const result = await AppointmentServices.payAppointment(payload, user)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Appointment Payment Initiated Successfully",
         data: result,
     });
 })
@@ -35,5 +49,5 @@ const bookAppointmentCallBack = catchAsync(async (req: Request, res: Response, n
 
 
 export const AppointmentController = {
-    bookAppointment, bookAppointmentCallBack
+    bookAppointment, payAppointment, bookAppointmentCallBack
 }
