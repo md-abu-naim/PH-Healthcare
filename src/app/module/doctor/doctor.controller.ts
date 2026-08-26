@@ -14,13 +14,13 @@ const applyAsDoctor = catchAsync(async (req: Request, res: Response, next: NextF
 
     console.log({resume, additionalFiles, data});
     
-    const result = await DoctorServices.applyAsDoctor()
+    const result = await DoctorServices.applyAsDoctor(data, resume, additionalFiles)
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Appointment Cancelled & Refund Successfully",
-        data: {},
+        data: result,
     });
 })
 
