@@ -7,7 +7,7 @@ import { Role } from "../../../generated/prisma/enums"
 const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, additionalFiles: Express.Multer.File[]) => {
     const isUserExists = await prisma.user.findUnique({
         where: {
-            email: payload.email
+            email: payload.user.email
         }
     })
 
@@ -49,7 +49,7 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
 
                     resolve(result)
                 }
-            ).end(resume?.buffer)
+            ).end(file?.buffer)
         })
     }))
 
@@ -62,10 +62,11 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
             ...payload.user,
             password: hashedPassword,
             role: Role.DOCTOR,
+            needPasswordChange: true,
             doctor: {
                 create: {
                     ...payload.doctor,
-                    resumeUrl: resumeUploadLink.secure_url,
+                    resume: resumeUploadLink.secure_url,
                     resumePublicId: resumeUploadLink.public_id,
                     additionalFiles: additionalFilesLinkUpload.map(file => ({
                         url: file.secure_url,
@@ -73,6 +74,9 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
                     }))
                 }
             }
+        },
+        include: {
+            doctor: true
         }
     })
 

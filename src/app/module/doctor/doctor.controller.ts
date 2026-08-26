@@ -10,9 +10,8 @@ const applyAsDoctor = catchAsync(async (req: Request, res: Response, next: NextF
 
     const resume = files?.['resume'] ? files['resume'][0] : null
     const additionalFiles = files?.['additionalFiles'] || null
-    const data = JSON.stringify(req.body.data)
+    const data = JSON.parse(req.body.data)
 
-    console.log({resume, additionalFiles, data});
     
     const result = await DoctorServices.applyAsDoctor(data, resume, additionalFiles)
 
