@@ -6,6 +6,20 @@ import { catchAsync } from "../../utils/catchAsync";
 
 
 const applyAsDoctor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body
+
+    
+    const result = await DoctorServices.verifyDoctorEmail(payload)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Doctor Email Verified Successfully",
+        data: result,
+    });
+})
+
+const verifyDoctorEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const files = req.files as {[fieldname: string]: Express.Multer.File[]}
 
     const resume = files?.['resume'] ? files['resume'][0] : null
@@ -24,5 +38,5 @@ const applyAsDoctor = catchAsync(async (req: Request, res: Response, next: NextF
 })
 
 export const DoctorController = {
-    applyAsDoctor
+    applyAsDoctor, verifyDoctorEmail
 }

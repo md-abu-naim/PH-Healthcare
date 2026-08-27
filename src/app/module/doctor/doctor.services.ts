@@ -3,6 +3,12 @@ import { prisma } from "../../lib/prisma"
 import { cloudinary } from "../../lib/cloudinary"
 import bcrypt from "bcryptjs"
 import { Role } from "../../../generated/prisma/enums"
+import crypto from 'crypto'
+import { redisClient } from "../../lib/redis"
+import path from "path"
+import { transporter } from "../../lib/nodemailer"
+import config from "../../config"
+import ejs from 'ejs'
 
 const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, additionalFiles: Express.Multer.File[]) => {
     const isUserExists = await prisma.user.findUnique({
@@ -80,9 +86,36 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
         }
     })
 
+    const otpKey = `doctor-application:otp:${payload.user.email}`
+    const otp = crypto.randomInt(100000, 1000000)
+
+    await redisClient.set(otpKey, otp, {
+        expiration: {
+            type: 'EX',
+            value: 60 * 60
+        }
+    })
+
+    const tamplatePath = path.join(process.cwd(), 'src/app/tamplates/patient-registation-otp.ejs')
+
+    const html = await ejs.renderFile(tamplatePath, {
+        otp
+    })
+
+    await transporter.sendMail({
+            from: config.email_sender,
+            to: payload.user.email,
+            subject: "Doctor Email Verification Code",
+            html
+        })
+
     return doctorApplication
 }
 
+const verifyDoctorEmail = async(payload: any) => {
+
+}
+
 export const DoctorServices = {
-    applyAsDoctor
+    applyAsDoctor, verifyDoctorEmail
 }
