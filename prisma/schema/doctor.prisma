@@ -1,4 +1,4 @@
-model Dorctor {
+model Doctor {
     id String @id @default(uuid(7))
 
     name    String
