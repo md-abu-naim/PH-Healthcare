@@ -3,6 +3,8 @@ import config from "../../config"
 import { getBkashIdToken } from "../../lib/bkash"
 import { prisma } from "../../lib/prisma";
 import type { RequestUser } from "../../middleware/checkAuth";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const bookAppointment = async (payload: any, user: RequestUser) => {
 
@@ -16,7 +18,7 @@ const bookAppointment = async (payload: any, user: RequestUser) => {
         const bkashIdToken = await getBkashIdToken()
 
         if (!bkashIdToken) {
-            throw new Error('No Bkash Access Token Found')
+            throw new AppError(httpStatus.BAD_GATEWAY, 'No Bkash Access Token Found')
         }
 
         const bkashPaymentCreateResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/create`, {
@@ -70,22 +72,22 @@ const payAppointment = async (payload: any, user: RequestUser) => {
     })
 
     if (!existingAppointment) {
-        throw new Error('Appointment does not exists')
+        throw new AppError(httpStatus.NOT_FOUND, 'Appointment does not exists')
     }
 
     if (existingAppointment.status === 'CONFIRMED') {
-        throw new Error('Appointment already paid & confirmed')
+        throw new AppError(httpStatus.BAD_REQUEST, 'Appointment already paid & confirmed')
     }
 
     if (existingAppointment.status === 'CANCELLED' || existingAppointment.status === 'ONGOING' || existingAppointment.status === 'COMPLETE') {
-        throw new Error(`Appointment already ${existingAppointment.status}`)
+        throw new AppError(httpStatus.BAD_REQUEST, `Appointment already ${existingAppointment.status}`)
     }
 
 
     const bkashIdToken = await getBkashIdToken()
 
     if (!bkashIdToken) {
-        throw new Error('No Bkash Access Token Found')
+        throw new AppError(httpStatus.BAD_GATEWAY, 'No Bkash Access Token Found')
     }
 
     const bkashPaymentCreateResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/create`, {
@@ -131,19 +133,19 @@ async function bookAppointmentCallBack(query: Record<string, any>) {
         const paymentId = query.paymentID || query.paymentId;
 
         if (!paymentId) {
-            throw new Error("Payment Id Missing")
+            throw new AppError(httpStatus.BAD_REQUEST, "Payment Id Missing")
         }
 
         const status = query.status
 
         if (!status) {
-            throw new Error('Payment Status is Missing')
+            throw new AppError(httpStatus.BAD_REQUEST, 'Payment Status is Missing')
         }
 
         const bkashIdToken = await getBkashIdToken()
 
         if (!bkashIdToken) {
-            throw new Error('No Bkash Access Token Found')
+            throw new AppError(httpStatus.BAD_GATEWAY, 'No Bkash Access Token Found')
         }
 
         const executedPaymentResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/execute`, {
@@ -238,15 +240,15 @@ const cancelAppointment = async (payload: any) => {
         })
 
         if (!existingAppointment) {
-            throw new Error('Appointment does not exists')
+            throw new AppError(httpStatus.NOT_FOUND, 'Appointment does not exists')
         }
 
-        if (existingAppointment.status === 'ONGOING' || existingAppointment.status === 'COMPLETE') {
-            throw new Error(`Appointment already ${existingAppointment.status}`)
-        }
+    if (existingAppointment.status === 'ONGOING' || existingAppointment.status === 'COMPLETE') {
+        throw new AppError(httpStatus.BAD_REQUEST, `Appointment already ${existingAppointment.status}`)
+    }
 
-        if (existingAppointment.status === 'CANCELLED') {
-            throw new Error('Appointment already cancelled')
+    if (existingAppointment.status === 'CANCELLED') {
+            throw new AppError(httpStatus.CONFLICT, 'Appointment already cancelled')
         }
 
         const updatedAppointment = await tx.appointment.update({
@@ -261,7 +263,7 @@ const cancelAppointment = async (payload: any) => {
         const bkashIdToken = await getBkashIdToken()
 
         if (!bkashIdToken) {
-            throw new Error('No Bkash Access Token Found')
+            throw new AppError(httpStatus.BAD_GATEWAY, 'No Bkash Access Token Found')
         }
 
         const bkashRefundPaymentResponse = await fetch(`${config.bkash_base_url}/tokenized/checkout/payment/refund`, {

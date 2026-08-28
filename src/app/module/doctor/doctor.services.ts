@@ -11,6 +11,8 @@ import config from "../../config"
 import ejs from 'ejs'
 import { IApproveDoctorPayload } from "./doctor.interface"
 import { RequestUser } from "../../middleware/checkAuth"
+import { AppError } from "../../utils/AppError"
+import httpStatus from "http-status"
 import { DoctorWhereInput } from "../../../generated/prisma/models"
 
 const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, additionalFiles: Express.Multer.File[]) => {
@@ -21,7 +23,7 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
     })
 
     if (isUserExists) {
-        throw new Error('User already have account')
+        throw new AppError(httpStatus.CONFLICT, 'User already have account')
     }
 
     const resumeUploadLink = await new Promise<UploadApiResponse>((resolve, reject) => {
@@ -34,7 +36,7 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
                 }
 
                 if (!result) {
-                    return reject(new Error("No Result Renturned"))
+                    return reject(new AppError(httpStatus.INTERNAL_SERVER_ERROR, "No Result Renturned"))
                 }
 
                 resolve(result)
@@ -53,7 +55,7 @@ const applyAsDoctor = async (payload: any, resume: Express.Multer.File | null, a
                     }
 
                     if (!result) {
-                        return reject(new Error("No Result Renturned"))
+                        return reject(new AppError(httpStatus.INTERNAL_SERVER_ERROR, "No Result Renturned"))
                     }
 
                     resolve(result)
@@ -124,11 +126,11 @@ const verifyDoctorEmail = async (payload: any) => {
     });
 
     if (!isUserExists) {
-        throw new Error('Doctor Application not Found')
+        throw new AppError(httpStatus.NOT_FOUND, 'Doctor Application not Found')
     }
 
     if (isUserExists?.emailVerified) {
-        throw new Error("User already verified")
+        throw new AppError(httpStatus.CONFLICT, "User already verified")
     }
 
     const otpKey = `doctor-application-otp:${email}`
@@ -136,11 +138,11 @@ const verifyDoctorEmail = async (payload: any) => {
     const redisOtp = await redisClient.get(otpKey)
 
     if (!redisOtp) {
-        throw new Error('Invalid OTP')
+        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid OTP')
     }
 
     if (redisOtp !== otp) {
-        throw new Error("OTP does not match")
+        throw new AppError(httpStatus.BAD_REQUEST, "OTP does not match")
     }
 
     await redisClient.del([otpKey])
@@ -168,21 +170,23 @@ const approveDoctor = async(payload: IApproveDoctorPayload, reviewer: RequestUse
 	});
 
 	if (!existingDoctor) {
-		throw new Error( "Doctor Application Not Found");
+		throw new AppError(httpStatus.NOT_FOUND, "Doctor Application Not Found");
 	}
 
 	if (existingDoctor.isDeleted) {
-		throw new Error( "Doctor Application Has Been Deleted");
+		throw new AppError(httpStatus.GONE, "Doctor Application Has Been Deleted");
 	}
 
 	if (!existingDoctor.user.emailVerified) {
-		throw new Error(
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
 			"Doctor Has Not Verified Their Email Yet. Application Cannot Be Reviewed.",
 		);
 	}
 
 	if (existingDoctor.verificationStatus !== DoctorVerificationStatus.PENDING) {
-		throw new Error(
+		throw new AppError(
+			httpStatus.CONFLICT,
 			`Doctor Application Has Already Been ${existingDoctor.verificationStatus.toLowerCase()}`,
 		);
 	}
@@ -191,7 +195,8 @@ const approveDoctor = async(payload: IApproveDoctorPayload, reviewer: RequestUse
 		verificationStatus === DoctorVerificationStatus.REJECTED &&
 		!rejectionReason
 	) {
-		throw new Error(
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
 			"Rejection Reason Is Required When Rejecting A Doctor Application",
 		);
 	}

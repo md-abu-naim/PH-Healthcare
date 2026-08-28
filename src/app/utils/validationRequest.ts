@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express"
 import { catchAsync } from "./catchAsync"
-import { patientValidation } from "../module/auth/auth.validation";
+import { AppError } from "./AppError"
+import httpStatus from "http-status"
 import type z from "zod";
 
 export const validationRequest = (zodSchema: z.ZodObject) => {
@@ -10,7 +11,7 @@ export const validationRequest = (zodSchema: z.ZodObject) => {
         const result = zodSchema.safeParse(payload);
 
         if (!result.success) {
-            throw new Error(result.error.issues[0].message)
+            throw new AppError(httpStatus.BAD_REQUEST, result.error.issues[0].message)
         }
 
         req.body = req.body

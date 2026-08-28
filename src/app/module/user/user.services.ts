@@ -1,6 +1,8 @@
 import type { UploadApiResponse } from "cloudinary";
 import { cloudinary } from "../../lib/cloudinary"
 import { prisma } from "../../lib/prisma";
+import { AppError } from "../../utils/AppError";
+import httpStatus from "http-status";
 
 const uploadProfileImagIntoCloudinary = async (buffer: Buffer, userId: string) => {
 
@@ -24,7 +26,7 @@ const uploadProfileImagIntoCloudinary = async (buffer: Buffer, userId: string) =
                 }
 
                 if (!result) {
-                    return reject(new Error("No Result Renturned"))
+                    return reject(new AppError(httpStatus.INTERNAL_SERVER_ERROR, "No Result Renturned"))
                 }
 
                 resolve(result)
