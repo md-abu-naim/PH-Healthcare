@@ -31,18 +31,18 @@ router.get(
 
 // router.get("/todays-schedule", ScheduleController.getTodaysSchedules);
 
-// router.patch(
-//     "/update-schedule/:scheduleId",
-//     auth(Role.DOCTOR),
-//     validateRequest(UpdateScheduleValidationZodSchema),
-//     ScheduleController.updateSchedule,
-// );
+router.patch(
+    "/update-schedule/:scheduleId",
+    auth(Role.DOCTOR),
+    validationRequest(UpdateScheduleValidationZodSchema),
+    ScheduleController.updateSchedule,
+);
 
-// router.patch(
-//     "/publish-schedule/:scheduleId",
-//     auth(Role.DOCTOR),
-//     ScheduleController.publishSchedule,
-// );
+router.patch(
+    "/publish-schedule/:scheduleId",
+    auth(Role.DOCTOR),
+    ScheduleController.publishSchedule,
+);
 
 router.get(
     "/:scheduleId",
@@ -50,10 +50,10 @@ router.get(
     ScheduleController.getScheduleById,
 );
 
-// router.delete(
-//     "/:scheduleId",
-//     auth(Role.DOCTOR),
-//     ScheduleController.deleteSchedule,
-// );
+router.delete(
+    "/:scheduleId",
+    auth(Role.DOCTOR),
+    ScheduleController.deleteSchedule,
+);
 
 export const ScheduleRoutes = router;
