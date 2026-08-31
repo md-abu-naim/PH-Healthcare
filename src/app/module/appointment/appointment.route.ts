@@ -11,4 +11,35 @@ router.post('/cancel-appointment', auth(Role.PATIENT, Role.ADMIN, Role.SUPER_ADM
 
 router.get('/book-appointment/payment/callback', AppointmentController.bookAppointmentCallBack)
 
+router.patch(
+	"/update-status/:appointmentId",
+	auth(Role.DOCTOR),
+	// validateRequest(UpdateAppointmentStatusValidationZodSchema),
+	AppointmentController.updateAppointmentStatus,
+);
+
+// router.get(
+// 	"/my-appointments",
+// 	auth(Role.PATIENT),
+// 	AppointmentController.getMyAppointments,
+// );
+
+// router.get(
+// 	"/doctor-appointments",
+// 	auth(Role.DOCTOR),
+// 	AppointmentController.getDoctorAppointments,
+// );
+
+// router.get(
+// 	"/all-appointments",
+// 	auth(Role.ADMIN, Role.SUPER_ADMIN),
+// 	AppointmentController.getAllAppointments,
+// );
+
+// router.get(
+// 	"/:appointmentId",
+// 	auth(Role.PATIENT, Role.DOCTOR, Role.ADMIN, Role.SUPER_ADMIN),
+// 	AppointmentController.getSingleAppointment,
+// );
+
 export const AppointmentRoutes = router;
