@@ -18,28 +18,28 @@ router.patch(
 	AppointmentController.updateAppointmentStatus,
 );
 
-// router.get(
-// 	"/my-appointments",
-// 	auth(Role.PATIENT),
-// 	AppointmentController.getMyAppointments,
-// );
+router.get(
+	"/my-appointments",
+	auth(Role.PATIENT),
+	AppointmentController.getMyAppointments,
+);
 
-// router.get(
-// 	"/doctor-appointments",
-// 	auth(Role.DOCTOR),
-// 	AppointmentController.getDoctorAppointments,
-// );
+router.get(
+	"/doctor-appointments",
+	auth(Role.DOCTOR),
+	AppointmentController.getDoctorAppointments,
+);
 
-// router.get(
-// 	"/all-appointments",
-// 	auth(Role.ADMIN, Role.SUPER_ADMIN),
-// 	AppointmentController.getAllAppointments,
-// );
+router.get(
+	"/all-appointments",
+	auth(Role.ADMIN, Role.SUPER_ADMIN),
+	AppointmentController.getAllAppointments,
+);
 
-// router.get(
-// 	"/:appointmentId",
-// 	auth(Role.PATIENT, Role.DOCTOR, Role.ADMIN, Role.SUPER_ADMIN),
-// 	AppointmentController.getSingleAppointment,
-// );
+router.get(
+	"/:appointmentId",
+	auth(Role.PATIENT, Role.DOCTOR, Role.ADMIN, Role.SUPER_ADMIN),
+	AppointmentController.getSingleAppointment,
+);
 
 export const AppointmentRoutes = router;
