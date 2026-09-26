@@ -1,9 +1,10 @@
-
-import { RegisterForm } from "@/components/Form/register-form";
+import VerifyAccountForm from "@/components/Form/verify-account-form";
 import Image from "next/image";
-import Link from "next/link";
 
-export default function RegisterPage() {
+import Link from "next/link";
+import { Suspense } from "react";
+
+export default function VerifyAccountPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -16,7 +17,9 @@ export default function RegisterPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <RegisterForm />
+            <Suspense fallback={<p>Loading...</p>}>
+              <VerifyAccountForm />
+            </Suspense>
           </div>
         </div>
       </div>
