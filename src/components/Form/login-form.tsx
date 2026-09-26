@@ -1,15 +1,24 @@
 "use client";
+
 import { useForm } from "@tanstack/react-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "../ui/field";
+import { loginSchema } from "@/validation";
 import { useState } from "react";
 import { Eye, EyeClosed } from "lucide-react";
-import { loginSchema } from "@/validation";
+import {  useLogin } from "@/hooks";
 import { useRouter } from "next/navigation";
-import { useLogin } from "@/hooks";
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
+import Link from "next/link";
+import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,15 +28,13 @@ export default function LoginForm() {
 
   const form = useForm({
     defaultValues: {
-      email: "tester@admin.com",
-      password: "Admin1",
+      email: "superadmin@gmail.com",
+      password: "Super@admin12345",
     },
     validators: {
       onSubmit: loginSchema,
     },
     onSubmit: ({ value }) => {
-      console.log(value);
-
       const loginData = {
         email: value.email,
         password: value.password,
@@ -51,7 +58,6 @@ export default function LoginForm() {
           });
         },
       });
-
     },
   });
 
@@ -144,6 +150,20 @@ export default function LoginForm() {
           </Button>
         </FieldGroup>
       </form>
+
+      <FieldSeparator>Or continue with</FieldSeparator>
+
+      <GoogleLoginComponent />
+
+      <div className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-medium underline underline-offset-4 hover:text-primary"
+        >
+          Register
+        </Link>
+      </div>
     </div>
   );
 }
